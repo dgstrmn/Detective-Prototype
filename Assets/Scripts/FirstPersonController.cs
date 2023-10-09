@@ -1,5 +1,7 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FirstPersonController : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class FirstPersonController : MonoBehaviour
     [Header("Look Sensitivity")]
     [SerializeField] private float mouseSensitivity = 2.0f;
     [SerializeField] private float angleLimit = 80.0f;
-    [SerializeField] private float headSwayMultiplier = 1.0f;
+    [SerializeField] private float headSwayMultiplier = 3.0f;
 
 
     [Header("Inputs Customization")]
@@ -33,12 +35,19 @@ public class FirstPersonController : MonoBehaviour
     private Vector3 currentMovement = Vector3.zero;
     private CharacterController characterController;
     private Transform interactedObject;
+    private Transform lastInteractedObject;
+    GameObject textObject;
     private bool isOccupied = false;
     bool playerActive = true;
     Vector3 objectLastPos = Vector3.zero;
-    Vector3 objectLastRot = Vector3.zero;
+    Quaternion objectLastRot = Quaternion.identity;
+    enum Mode
+    {
+        Use, Inspect, Off
+    }
     private void Start()
     {
+        textObject = GameObject.Find("Text");
         characterController = GetComponent<CharacterController>();
         mainCamera = Camera.main;
         Cursor.lockState = CursorLockMode.Locked;
@@ -99,7 +108,7 @@ public class FirstPersonController : MonoBehaviour
         verticalRotation -= Input.GetAxisRaw(MouseYInput) * mouseSensitivity;
         verticalRotation = Mathf.Clamp(verticalRotation, -angleLimit, angleLimit);
         float headSway = HandleHeadShake();
-        mainCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0, headSway);
+        mainCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0, headSway * headSwayMultiplier);
     }
 
     float HandleHeadShake()
@@ -147,40 +156,69 @@ public class FirstPersonController : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit) && hit.collider != null)
             {
-                Debug.Log(hit.transform.name);
-                if (Input.GetKeyDown(interactKey))
+                interactedObject = hit.collider.transform;
+                float distance = Vector3.Distance(interactedObject.position, transform.position);
+                if (interactedObject.CompareTag("Inspectable") && distance <= 3.0f)//if an inspectable object is hit and is within 3 meter radius
                 {
-                    interactedObject = hit.collider.transform;
-                    float distance = Vector3.Distance(interactedObject.position, transform.position);
-                    if (interactedObject.CompareTag("Inspectable") && distance <= 3.0f) //if an inspectable object is hit and is within 3 meter radius
+                    lastInteractedObject = interactedObject;
+                    interactedObject.GetComponent<Outline>().enabled = true;
+                    HandleUIText(Mode.Inspect);
+                    if (Input.GetKeyDown(interactKey))
                     {
+                        HandleUIText(Mode.Off);
+                        interactedObject.GetComponent<ObjectRotateHandler>().enabled = true;
+                        interactedObject.GetComponent<Outline>().enabled = false;
                         objectLastPos = interactedObject.position;
-                        objectLastRot = interactedObject.rotation.eulerAngles;
+                        objectLastRot = interactedObject.rotation;
                         playerActive = false;
                         Cursor.lockState = CursorLockMode.Confined;
                         Cursor.visible = true;
                         isOccupied = true;
-                        interactedObject = hit.collider.transform;
                         interactedObject.SetParent(mainCamera.transform);
-                        Vector3 interactablePos = new Vector3(mainCamera.transform.localPosition.x, mainCamera.transform.localPosition.y - 0.7f, mainCamera.transform.localPosition.z + 0.6f);
+                        Vector3 interactablePos = new Vector3(mainCamera.transform.localPosition.x, mainCamera.transform.localPosition.y - 0.75f, mainCamera.transform.localPosition.z + 0.75f);
                         interactedObject.SetLocalPositionAndRotation(interactablePos, Quaternion.Euler(0, -90, 75));
                     }
                 }
+                else
+                {
+                    lastInteractedObject.GetComponent<Outline>().enabled = false;
+                    HandleUIText(Mode.Off);
+                }
             }
         }
-        else //if the inspectable object is dropped
+        else
         {
-            if (Input.GetKeyDown(interactKey))
+            if (Input.GetKeyDown(interactKey)) //if the inspectable object is put down
             {
-                interactedObject.SetPositionAndRotation(objectLastPos, Quaternion.Euler(objectLastRot));
+                interactedObject.GetComponent<ObjectRotateHandler>().enabled = false;
+                interactedObject.SetPositionAndRotation(objectLastPos, objectLastRot);
                 playerActive = true;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 interactedObject.parent = null;
                 isOccupied = false;
+
             }
 
         }
 
+    }
+
+    void HandleUIText(Mode mode)
+    {
+        switch (mode)
+        {
+            case Mode.Use:
+                textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("Press " + interactKey.ToString() + " To Use '" + interactedObject.name + "'");
+
+                break;
+            case Mode.Inspect:
+                textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("Press " + interactKey.ToString() + " To Inpect '" + interactedObject.name + "'");
+
+                break;
+            case Mode.Off:
+                textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("");
+                break;
+        }
     }
 }
