@@ -66,7 +66,6 @@ public class FirstPersonController : MonoBehaviour
 
     }
 
-
     void HandleMovement()
     {
         float speedMultiplier = Input.GetKey(sprintKey) ? sprintMultiplier : 1f;
@@ -181,7 +180,10 @@ public class FirstPersonController : MonoBehaviour
                 }
                 else
                 {
-                    lastInteractedObject.GetComponent<Outline>().enabled = false;
+                    if(lastInteractedObject != null)
+                    {
+                        lastInteractedObject.GetComponent<Outline>().enabled = false;
+                    }
                     HandleUIText(Mode.Off);
                 }
             }
@@ -221,4 +223,6 @@ public class FirstPersonController : MonoBehaviour
                 break;
         }
     }
+
+
 }

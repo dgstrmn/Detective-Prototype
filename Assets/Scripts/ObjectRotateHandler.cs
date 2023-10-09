@@ -7,7 +7,7 @@ public class ObjectRotateHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        y_axis = Camera.main.transform.up;
+        y_axis = new Vector3(0, 1, 0);
         x_axis = Camera.main.transform.right;
     }
     public float horizontalSpeed = 5.0F;
@@ -21,8 +21,18 @@ public class ObjectRotateHandler : MonoBehaviour
             float h = horizontalSpeed * Input.GetAxis("Mouse X");
             float v = verticalSpeed * Input.GetAxis("Mouse Y");
             transform.RotateAround(transform.position, y_axis, -h);
-            transform.RotateAround(transform.position, x_axis, v);
+            transform.RotateAround(transform.position, x_axis, -v);
         }
+    }
 
+    void HandleInspectableSecrets()
+    {
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit) && hit.collider != null)
+        {
+
+        }
     }
 }
