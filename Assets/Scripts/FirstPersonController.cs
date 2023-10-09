@@ -14,7 +14,7 @@ public class FirstPersonController : MonoBehaviour
     [Header("Look Sensitivity")]
     [SerializeField] private float mouseSensitivity = 2.0f;
     [SerializeField] private float angleLimit = 80.0f;
-    [SerializeField] private float headBobMultiplier = 1.0f;
+    [SerializeField] private float headSwayMultiplier = 1.0f;
 
 
     [Header("Inputs Customization")]
@@ -27,13 +27,16 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private KeyCode interactKey = KeyCode.E;
 
     private Camera mainCamera;
-    private float headBobAngle = 0;
+    private float headSwayAngle = 0;
     private const float TWO_PI = Mathf.PI * 2;
     private float verticalRotation;
     private Vector3 currentMovement = Vector3.zero;
     private CharacterController characterController;
     private Transform interactedObject;
     private bool isOccupied = false;
+    bool playerActive = true;
+    Vector3 objectLastPos = Vector3.zero;
+    Vector3 objectLastRot = Vector3.zero;
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -45,9 +48,13 @@ public class FirstPersonController : MonoBehaviour
 
     private void Update()
     {
-        HandleMovement();
-        HandleRotation();
+        if (playerActive)
+        {
+            HandleMovement();
+            HandleRotation();
+        }
         HandleInteraction();
+
     }
 
 
@@ -91,51 +98,51 @@ public class FirstPersonController : MonoBehaviour
 
         verticalRotation -= Input.GetAxisRaw(MouseYInput) * mouseSensitivity;
         verticalRotation = Mathf.Clamp(verticalRotation, -angleLimit, angleLimit);
-        float headBob = HandleHeadShake();
-        mainCamera.transform.localRotation = Quaternion.Euler(verticalRotation + headBob, 0, 0);
+        float headSway = HandleHeadShake();
+        mainCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0, headSway);
     }
 
     float HandleHeadShake()
     {
-        headBobMultiplier = Input.GetKey(sprintKey) ? 1.7f : 1.0f;
+        headSwayMultiplier = Input.GetKey(sprintKey) ? 2f : 1f;
 
         if (Input.GetButton("Vertical") && characterController.isGrounded)
         {
-            headBobAngle += 8f * Time.deltaTime * headBobMultiplier;
-            headBobAngle %= TWO_PI;
+            headSwayAngle += 8f * Time.deltaTime * headSwayMultiplier;
+            headSwayAngle %= TWO_PI;
         }
         else
         {
-            if (headBobAngle < Mathf.PI && headBobAngle > 0)
+            if (headSwayAngle < Mathf.PI && headSwayAngle > 0)
             {
-                headBobAngle += 8f * Time.deltaTime * headBobMultiplier;
-                if (headBobAngle >= Mathf.PI)
+                headSwayAngle += 8f * Time.deltaTime * headSwayMultiplier;
+                if (headSwayAngle >= Mathf.PI)
                 {
-                    headBobAngle = 0;
+                    headSwayAngle = 0;
                 }
             }
-            else if (headBobAngle > Mathf.PI)
+            else if (headSwayAngle > Mathf.PI)
             {
-                headBobAngle += 8f * Time.deltaTime * headBobMultiplier;
-                if (headBobAngle >= TWO_PI)
+                headSwayAngle += 8f * Time.deltaTime * headSwayMultiplier;
+                if (headSwayAngle >= TWO_PI)
                 {
-                    headBobAngle = 0;
+                    headSwayAngle = 0;
                 }
             }
             else
             {
-                headBobAngle = 0;
+                headSwayAngle = 0;
             }
         }
 
-        return MathF.Sin(headBobAngle);
+        return MathF.Sin(headSwayAngle) / 3f;
     }
 
     void HandleInteraction()
     {
         if (Input.GetKeyDown(interactKey))
         {
-            if (!isOccupied)
+            if (!isOccupied) //if our hands are empty
             {
                 RaycastHit hit;
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -146,25 +153,31 @@ public class FirstPersonController : MonoBehaviour
                     {
                         interactedObject = hit.collider.transform;
                         float distance = Vector3.Distance(interactedObject.position, transform.position);
-                        if (distance <= 3.0f && interactedObject.CompareTag("Inspectable"))
+                        if (distance <= 3.0f && interactedObject.CompareTag("Inspectable")) //if an inspectable object is hit
                         {
+                            objectLastPos = interactedObject.position;
+                            objectLastRot = interactedObject.rotation.eulerAngles;
+                            playerActive = false;
+                            Cursor.lockState = CursorLockMode.Confined;
+                            Cursor.visible = true;
                             isOccupied = true;
                             interactedObject = hit.collider.transform;
                             interactedObject.SetParent(mainCamera.transform);
-                            interactedObject.GetComponent<Rigidbody>().useGravity = false;
-                            Vector3 interactablePos = new Vector3(mainCamera.transform.localPosition.x, mainCamera.transform.localPosition.y - 0.7f, mainCamera.transform.localPosition.z + 0.3f);
+                            Vector3 interactablePos = new Vector3(mainCamera.transform.localPosition.x, mainCamera.transform.localPosition.y - 0.7f, mainCamera.transform.localPosition.z + 0.6f);
                             interactedObject.SetLocalPositionAndRotation(interactablePos, Quaternion.Euler(0, -90, 75));
-                            interactedObject.GetComponent<Rigidbody>().isKinematic = true;
                         }
                         
 
                     }
                 }
             }
-            else
+            else //if the inspectable object is dropped
             {
-                interactedObject.GetComponent<Rigidbody>().isKinematic = false;
-                interactedObject.GetComponent<Rigidbody>().useGravity = true;
+
+                interactedObject.SetPositionAndRotation(objectLastPos,Quaternion.Euler(objectLastRot));
+                playerActive = true;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
                 interactedObject.parent = null;
                 isOccupied = false;
 
