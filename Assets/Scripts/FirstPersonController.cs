@@ -140,48 +140,46 @@ public class FirstPersonController : MonoBehaviour
 
     void HandleInteraction()
     {
-        if (Input.GetKeyDown(interactKey))
+        if (!isOccupied) //if our hands are empty
         {
-            if (!isOccupied) //if our hands are empty
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out hit) && hit.collider != null)
             {
-                RaycastHit hit;
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-                if (Physics.Raycast(ray, out hit))
+                Debug.Log(hit.transform.name);
+                if (Input.GetKeyDown(interactKey))
                 {
-                    if (hit.collider != null)
+                    interactedObject = hit.collider.transform;
+                    float distance = Vector3.Distance(interactedObject.position, transform.position);
+                    if (interactedObject.CompareTag("Inspectable") && distance <= 3.0f) //if an inspectable object is hit and is within 3 meter radius
                     {
+                        objectLastPos = interactedObject.position;
+                        objectLastRot = interactedObject.rotation.eulerAngles;
+                        playerActive = false;
+                        Cursor.lockState = CursorLockMode.Confined;
+                        Cursor.visible = true;
+                        isOccupied = true;
                         interactedObject = hit.collider.transform;
-                        float distance = Vector3.Distance(interactedObject.position, transform.position);
-                        if (distance <= 3.0f && interactedObject.CompareTag("Inspectable")) //if an inspectable object is hit
-                        {
-                            objectLastPos = interactedObject.position;
-                            objectLastRot = interactedObject.rotation.eulerAngles;
-                            playerActive = false;
-                            Cursor.lockState = CursorLockMode.Confined;
-                            Cursor.visible = true;
-                            isOccupied = true;
-                            interactedObject = hit.collider.transform;
-                            interactedObject.SetParent(mainCamera.transform);
-                            Vector3 interactablePos = new Vector3(mainCamera.transform.localPosition.x, mainCamera.transform.localPosition.y - 0.7f, mainCamera.transform.localPosition.z + 0.6f);
-                            interactedObject.SetLocalPositionAndRotation(interactablePos, Quaternion.Euler(0, -90, 75));
-                        }
-                        
-
+                        interactedObject.SetParent(mainCamera.transform);
+                        Vector3 interactablePos = new Vector3(mainCamera.transform.localPosition.x, mainCamera.transform.localPosition.y - 0.7f, mainCamera.transform.localPosition.z + 0.6f);
+                        interactedObject.SetLocalPositionAndRotation(interactablePos, Quaternion.Euler(0, -90, 75));
                     }
                 }
             }
-            else //if the inspectable object is dropped
+        }
+        else //if the inspectable object is dropped
+        {
+            if (Input.GetKeyDown(interactKey))
             {
-
-                interactedObject.SetPositionAndRotation(objectLastPos,Quaternion.Euler(objectLastRot));
+                interactedObject.SetPositionAndRotation(objectLastPos, Quaternion.Euler(objectLastRot));
                 playerActive = true;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 interactedObject.parent = null;
                 isOccupied = false;
-
             }
+
         }
 
     }
