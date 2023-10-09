@@ -16,7 +16,7 @@ public class FirstPersonController : MonoBehaviour
     [Header("Look Sensitivity")]
     [SerializeField] private float mouseSensitivity = 2.0f;
     [SerializeField] private float angleLimit = 80.0f;
-    [SerializeField] private float headSwayMultiplier = 3.0f;
+    [SerializeField] private float headSwayMultiplier = 1.0f;
 
 
     [Header("Inputs Customization")]
@@ -112,7 +112,7 @@ public class FirstPersonController : MonoBehaviour
 
     float HandleHeadShake()
     {
-        headSwayMultiplier = Input.GetKey(sprintKey) ? 2f : 1f;
+        headSwayMultiplier = Input.GetKey(sprintKey) ? 1.5f : 1f;
 
         if (Input.GetButton("Vertical") && characterController.isGrounded)
         {
@@ -215,7 +215,7 @@ public class FirstPersonController : MonoBehaviour
 
                 break;
             case Mode.Inspect:
-                textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("Press " + interactKey.ToString() + " To Inpect '" + interactedObject.name + "'");
+                textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("Press " + interactKey.ToString() + " To Inspect '" + interactedObject.name + "'");
 
                 break;
             case Mode.Off:

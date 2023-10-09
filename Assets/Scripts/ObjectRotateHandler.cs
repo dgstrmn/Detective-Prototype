@@ -7,22 +7,20 @@ public class ObjectRotateHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        y_axis = new Vector3(0, 1, 0);
-        x_axis = Camera.main.transform.right;
+        
     }
     public float horizontalSpeed = 5.0F;
     public float verticalSpeed = 5.0F;
-    Vector3 y_axis = Vector3.one;
-    Vector3 x_axis = Vector3.one;
     void Update()
     {
         if (Input.GetMouseButton(0))
         {
             float h = horizontalSpeed * Input.GetAxis("Mouse X");
             float v = verticalSpeed * Input.GetAxis("Mouse Y");
-            transform.RotateAround(transform.position, y_axis, -h);
-            transform.RotateAround(transform.position, x_axis, -v);
+
+            transform.Rotate(v * Camera.main.transform.forward.z, -h, -v * Camera.main.transform.forward.x, Space.World); //By default it is Space.Self and you do not need to include that value
         }
+
     }
 
     void HandleInspectableSecrets()
