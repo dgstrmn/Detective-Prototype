@@ -157,7 +157,7 @@ public class FirstPersonController : MonoBehaviour
             {
                 interactedObject = hit.collider.transform;
                 float distance = Vector3.Distance(interactedObject.position, transform.position);
-                if (interactedObject.CompareTag("Inspectable") && distance <= 3.0f)//if an inspectable object is hit and is within 3 meter radius
+                if (interactedObject.CompareTag("Inspectable") && distance <= 2.0f)//if an inspectable object is hit and is within 3 meter radius
                 {
                     lastInteractedObject = interactedObject;
                     interactedObject.GetComponent<Outline>().enabled = true;
@@ -165,7 +165,7 @@ public class FirstPersonController : MonoBehaviour
                     if (Input.GetKeyDown(interactKey))
                     {
                         HandleUIText(Mode.Off);
-                        interactedObject.GetComponent<ObjectRotateHandler>().enabled = true;
+                        interactedObject.GetComponent<ObjectRotationHandler>().enabled = true;
                         interactedObject.GetComponent<Outline>().enabled = false;
                         objectLastPos = interactedObject.position;
                         objectLastRot = interactedObject.rotation;
@@ -192,7 +192,7 @@ public class FirstPersonController : MonoBehaviour
         {
             if (Input.GetKeyDown(interactKey)) //if the inspectable object is put down
             {
-                interactedObject.GetComponent<ObjectRotateHandler>().enabled = false;
+                interactedObject.GetComponent<ObjectRotationHandler>().enabled = false;
                 interactedObject.SetPositionAndRotation(objectLastPos, objectLastRot);
                 playerActive = true;
                 Cursor.lockState = CursorLockMode.Locked;
@@ -203,6 +203,11 @@ public class FirstPersonController : MonoBehaviour
             }
 
         }
+        if (Input.GetMouseButtonDown(0))
+        {
+            HandleInspectableSecrets();
+        }
+            
 
     }
 
@@ -222,6 +227,37 @@ public class FirstPersonController : MonoBehaviour
                 textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("");
                 break;
         }
+    }
+
+    void HandleInspectableSecrets()
+    {
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            if (hit.collider != null && hit.transform.parent == interactedObject)
+            {
+                Debug.Log("You have found a secret");
+            }
+
+        }
+    }
+
+    void HandleUsage()
+    {
+        //if (Input.GetMouseButton(0))
+        //{
+
+        //    float h = horizontalSpeed * Input.GetAxis("Mouse X");
+        //    float v = verticalSpeed * Input.GetAxis("Mouse Y");
+
+        //    transform.Rotate(v * Camera.main.transform.forward.z, -h, -v * Camera.main.transform.forward.x, Space.World); //By default it is Space.Self and you do not need to include that value
+        //}
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    HandleInspectableSecrets();
+        //}
     }
 
 
