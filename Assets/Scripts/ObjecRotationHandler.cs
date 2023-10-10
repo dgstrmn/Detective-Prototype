@@ -9,10 +9,11 @@ public class ObjectRotationHandler : MonoBehaviour
 
     public float horizontalSpeed = 5.0F;
     public float verticalSpeed = 5.0F;
+    Transform rotationFixer;
     // Start is called before the first frame update
     void Start()
     {
-        
+        rotationFixer = GameObject.Find("rotationfixer").transform;
     }
     
     void Update()
@@ -24,18 +25,20 @@ public class ObjectRotationHandler : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            float h = horizontalSpeed * Input.GetAxis("Mouse X");
-            float v = verticalSpeed * Input.GetAxis("Mouse Y");
+            rotationFixer.rotation = Quaternion.identity;
+            float xRot = verticalSpeed * Input.GetAxis("Mouse Y") * Camera.main.transform.forward.z;
+            float zRot = verticalSpeed * Input.GetAxis("Mouse Y") * Camera.main.transform.forward.x;
+            float yRot = horizontalSpeed * Input.GetAxis("Mouse X") ;
 
-            float xRot = v * Camera.main.transform.forward.z;
-            float zRot = -v * Camera.main.transform.forward.x;
-            if(Mathf.Abs(xRot) < 1f && Mathf.Abs(zRot) < 1f)
-            {
-                xRot *= 5;
-                zRot *= 5;
-            }
-            transform.Rotate(xRot, -h, zRot, Space.World); //By default it is Space.Self and you do not need to include that value
-            Debug.Log(v * Camera.main.transform.forward.z + " " + -v * Camera.main.transform.forward.x + " " + -h);
+            rotationFixer.Rotate(Camera.main.transform.up, -yRot);
+            rotationFixer.Rotate(Vector3.right, xRot);
+            rotationFixer.Rotate(Vector3.forward, -zRot);
+
+
+
+            transform.rotation = rotationFixer.rotation * transform.rotation;
+
+
         }
     }
 

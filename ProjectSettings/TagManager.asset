@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Inspectable
   - Secret
+  - Door
+  - Key
   layers:
   - Default
   - TransparentFX

@@ -37,6 +37,8 @@ public class FirstPersonController : MonoBehaviour
     private Transform interactedObject;
     private Transform lastInteractedObject;
     GameObject textObject;
+    GameObject crosshair;
+    Transform keychain;
     private bool isOccupied = false;
     bool playerActive = true;
     Vector3 objectLastPos = Vector3.zero;
@@ -47,7 +49,9 @@ public class FirstPersonController : MonoBehaviour
     }
     private void Start()
     {
+        crosshair = GameObject.Find("Crosshair Group");
         textObject = GameObject.Find("Text");
+        keychain = transform.Find("KeyChain");
         characterController = GetComponent<CharacterController>();
         mainCamera = Camera.main;
         Cursor.lockState = CursorLockMode.Locked;
@@ -63,6 +67,7 @@ public class FirstPersonController : MonoBehaviour
             HandleRotation();
         }
         HandleInteraction();
+        HandleUsage();
 
     }
 
@@ -164,6 +169,7 @@ public class FirstPersonController : MonoBehaviour
                     HandleUIText(Mode.Inspect);
                     if (Input.GetKeyDown(interactKey))
                     {
+                        crosshair.SetActive(false);
                         HandleUIText(Mode.Off);
                         interactedObject.GetComponent<ObjectRotationHandler>().enabled = true;
                         interactedObject.GetComponent<Outline>().enabled = false;
@@ -180,7 +186,7 @@ public class FirstPersonController : MonoBehaviour
                 }
                 else
                 {
-                    if(lastInteractedObject != null)
+                    if (lastInteractedObject != null)
                     {
                         lastInteractedObject.GetComponent<Outline>().enabled = false;
                     }
@@ -199,6 +205,7 @@ public class FirstPersonController : MonoBehaviour
                 Cursor.visible = false;
                 interactedObject.parent = null;
                 isOccupied = false;
+                crosshair.SetActive(true);
 
             }
 
@@ -207,7 +214,7 @@ public class FirstPersonController : MonoBehaviour
         {
             HandleInspectableSecrets();
         }
-            
+
 
     }
 
@@ -229,6 +236,7 @@ public class FirstPersonController : MonoBehaviour
         }
     }
 
+
     void HandleInspectableSecrets()
     {
         RaycastHit hit;
@@ -246,18 +254,50 @@ public class FirstPersonController : MonoBehaviour
 
     void HandleUsage()
     {
-        //if (Input.GetMouseButton(0))
-        //{
+        if (Input.GetKeyDown(interactKey))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        //    float h = horizontalSpeed * Input.GetAxis("Mouse X");
-        //    float v = verticalSpeed * Input.GetAxis("Mouse Y");
+            if (Physics.Raycast(ray, out hit) && hit.collider != null)
+            {
+                interactedObject = hit.transform;
+                float distance = Vector3.Distance(interactedObject.position, transform.position);
+                if (distance <= 2.0f)
+                {
+                    if (interactedObject.CompareTag("Door"))
+                    {
+                        Transform key = transform.Find(interactedObject.name + " Key");
+                        if (key != null)
+                        {
+                            key.SetPositionAndRotation(interactedObject.Find("Keyhole").position, Quaternion.Euler(-90,0,0));
+                            key.parent = interactedObject;
+                            key.GetComponent<MeshCollider>().enabled = false;
+                            key.name = "Key";
+                            interactedObject.GetComponent<DoorRotateHandler>().enabled = true;
+                            Debug.Log("Opened a door");
+                        }
+                        else
+                        {
+                            if(interactedObject.Find("Key"))
+                                Debug.Log("Door is already opened");
+                            else
+                                Debug.Log("You don't have the required key...");
+                        }
 
-        //    transform.Rotate(v * Camera.main.transform.forward.z, -h, -v * Camera.main.transform.forward.x, Space.World); //By default it is Space.Self and you do not need to include that value
-        //}
-        //if (Input.GetMouseButtonDown(0))
-        //{
-        //    HandleInspectableSecrets();
-        //}
+                    }
+                    if (interactedObject.CompareTag("Key"))
+                    {
+                        Debug.Log("Added Key");
+                        interactedObject.SetPositionAndRotation(keychain.position, Quaternion.identity);
+                        interactedObject.parent = transform;
+                    }
+                }
+                
+
+            }
+        }
+
     }
 
 
