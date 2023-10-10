@@ -43,6 +43,8 @@ public class FirstPersonController : MonoBehaviour
     bool playerActive = true;
     Vector3 objectLastPos = Vector3.zero;
     Quaternion objectLastRot = Quaternion.identity;
+    public AudioSource src;
+    public AudioClip sfx1, sfx2, sfx3, sfx4, sfx5;
     enum Mode
     {
         Use, Inspect, Off
@@ -165,23 +167,23 @@ public class FirstPersonController : MonoBehaviour
                 if (interactedObject.CompareTag("Inspectable") && distance <= 2.0f)//if an inspectable object is hit and is within 3 meter radius
                 {
                     lastInteractedObject = interactedObject;
-                    interactedObject.GetComponent<Outline>().enabled = true;
+                    lastInteractedObject.GetComponent<Outline>().enabled = true;
                     HandleUIText(Mode.Inspect);
                     if (Input.GetKeyDown(interactKey))
                     {
                         crosshair.SetActive(false);
                         HandleUIText(Mode.Off);
-                        interactedObject.GetComponent<ObjectRotationHandler>().enabled = true;
-                        interactedObject.GetComponent<Outline>().enabled = false;
-                        objectLastPos = interactedObject.position;
-                        objectLastRot = interactedObject.rotation;
+                        lastInteractedObject.GetComponent<ObjectRotationHandler>().enabled = true;
+                        lastInteractedObject.GetComponent<Outline>().enabled = false;
+                        objectLastPos = lastInteractedObject.position;
+                        objectLastRot = lastInteractedObject.rotation;
                         playerActive = false;
                         Cursor.lockState = CursorLockMode.Confined;
                         Cursor.visible = true;
                         isOccupied = true;
-                        interactedObject.SetParent(mainCamera.transform);
+                        lastInteractedObject.SetParent(mainCamera.transform);
                         Vector3 interactablePos = new Vector3(mainCamera.transform.localPosition.x, mainCamera.transform.localPosition.y - 0.75f, mainCamera.transform.localPosition.z + 0.75f);
-                        interactedObject.SetLocalPositionAndRotation(interactablePos, Quaternion.Euler(0, -90, 75));
+                        lastInteractedObject.SetLocalPositionAndRotation(interactablePos, Quaternion.Euler(0, -90, 75));
                     }
                 }
                 else
@@ -198,12 +200,12 @@ public class FirstPersonController : MonoBehaviour
         {
             if (Input.GetKeyDown(interactKey)) //if the inspectable object is put down
             {
-                interactedObject.GetComponent<ObjectRotationHandler>().enabled = false;
-                interactedObject.SetPositionAndRotation(objectLastPos, objectLastRot);
+                lastInteractedObject.GetComponent<ObjectRotationHandler>().enabled = false;
+                lastInteractedObject.SetPositionAndRotation(objectLastPos, objectLastRot);
                 playerActive = true;
-                Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                interactedObject.parent = null;
+                Cursor.lockState = CursorLockMode.Locked;
+                lastInteractedObject.parent = null;
                 isOccupied = false;
                 crosshair.SetActive(true);
 
@@ -223,7 +225,7 @@ public class FirstPersonController : MonoBehaviour
         switch (mode)
         {
             case Mode.Use:
-                textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("Press " + interactKey.ToString() + " To Use '" + interactedObject.name + "'");
+                textObject.transform.GetComponent<TMPro.TextMeshProUGUI>().SetText("Press " + interactKey.ToString() + " To Interact '" + interactedObject.name + "'");
 
                 break;
             case Mode.Inspect:
@@ -247,6 +249,8 @@ public class FirstPersonController : MonoBehaviour
             if (hit.collider != null && hit.transform.parent == interactedObject)
             {
                 Debug.Log("You have found a secret");
+                src.clip = sfx4;
+                src.Play();
             }
 
         }
@@ -254,46 +258,75 @@ public class FirstPersonController : MonoBehaviour
 
     void HandleUsage()
     {
-        if (Input.GetKeyDown(interactKey))
+        if (!isOccupied)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
+
             if (Physics.Raycast(ray, out hit) && hit.collider != null)
             {
-                interactedObject = hit.transform;
+                interactedObject = hit.collider.transform;
                 float distance = Vector3.Distance(interactedObject.position, transform.position);
+
                 if (distance <= 2.0f)
                 {
                     if (interactedObject.CompareTag("Door"))
                     {
-                        Transform key = transform.Find(interactedObject.name + " Key");
-                        if (key != null)
+                        lastInteractedObject = interactedObject;
+                        lastInteractedObject.GetComponent<Outline>().enabled = true;
+                        HandleUIText(Mode.Use);
+                        if (Input.GetKeyDown(interactKey))
                         {
-                            key.SetPositionAndRotation(interactedObject.Find("Keyhole").position, Quaternion.Euler(-90,0,0));
-                            key.parent = interactedObject;
-                            key.GetComponent<MeshCollider>().enabled = false;
-                            key.name = "Key";
-                            interactedObject.GetComponent<DoorRotateHandler>().enabled = true;
-                            Debug.Log("Opened a door");
-                        }
-                        else
-                        {
-                            if(interactedObject.Find("Key"))
-                                Debug.Log("Door is already opened");
-                            else
-                                Debug.Log("You don't have the required key...");
-                        }
+                            Transform key = transform.Find(lastInteractedObject.name + " Key");
+                            if (key != null)
+                            {
+                                key.SetPositionAndRotation(lastInteractedObject.Find("Keyhole").position, Quaternion.Euler(-90, 0, 0));
+                                key.parent = lastInteractedObject;
+                                key.GetComponent<MeshCollider>().enabled = false;
+                                key.name = "Key";
+                                lastInteractedObject.GetComponent<DoorRotateHandler>().enabled = true;
+                                Debug.Log("Opened a door");
+                                src.clip = sfx1;
+                                src.Play();
 
+                            }
+                            else
+                            {
+                                if (interactedObject.Find("Key"))
+                                {
+                                    Debug.Log("Door is already opened");
+                                    src.clip = sfx3;
+                                    src.Play();
+                                }
+                                    
+                                else
+                                {
+                                    
+                                    Debug.Log("You don't have the required key...");
+                                    src.clip = sfx2;
+                                    src.Play();
+                                }
+                                    
+                            }
+                        }
                     }
-                    if (interactedObject.CompareTag("Key"))
+                    else if (interactedObject.CompareTag("Key"))
                     {
-                        Debug.Log("Added Key");
-                        interactedObject.SetPositionAndRotation(keychain.position, Quaternion.identity);
-                        interactedObject.parent = transform;
+                        lastInteractedObject = interactedObject;
+                        lastInteractedObject.GetComponent<Outline>().enabled = true;
+                        HandleUIText(Mode.Use);
+                        if (Input.GetKeyDown(interactKey))
+                        {
+                            Debug.Log("Added Key");
+                            src.clip = sfx5;
+                            src.Play();
+                            interactedObject.SetPositionAndRotation(keychain.position, Quaternion.identity);
+                            interactedObject.parent = transform;
+                        }
                     }
                 }
-                
+
 
             }
         }

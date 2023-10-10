@@ -305,6 +305,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0241650c4b7f5614da01b33ce2972972, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &530128402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 530128393}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 5
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -703,6 +721,7 @@ GameObject:
   - component: {fileID: 943995782}
   - component: {fileID: 943995781}
   - component: {fileID: 943995786}
+  - component: {fileID: 943995787}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -736,6 +755,12 @@ MonoBehaviour:
   sprintKey: 304
   jumpKey: 32
   interactKey: 101
+  src: {fileID: 943995787}
+  sfx1: {fileID: 8300000, guid: 3c8e6d0c8974b1e428d4c6ca92a71305, type: 3}
+  sfx2: {fileID: 8300000, guid: b6a800e591f975f409cc4e52b9e7e173, type: 3}
+  sfx3: {fileID: 8300000, guid: 8229c7be149cd9b448b4254b592cffc1, type: 3}
+  sfx4: {fileID: 8300000, guid: cf0f244498657884fac6da1295787bf1, type: 3}
+  sfx5: {fileID: 8300000, guid: 9f057d927e9ad394f99b4754b39b5f4b, type: 3}
 --- !u!136 &943995782
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -852,6 +877,102 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!82 &943995787
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 943995780}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -2006,6 +2127,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5759061881866809307, guid: 00b51a6ecd4001b45b0e1999dfe32ca9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 530128398}
+    - targetCorrespondingSourceObject: {fileID: 5759061881866809307, guid: 00b51a6ecd4001b45b0e1999dfe32ca9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 530128402}
   m_SourcePrefab: {fileID: 100100000, guid: 00b51a6ecd4001b45b0e1999dfe32ca9, type: 3}
 --- !u!23 &7689586448218069573
 MeshRenderer:
@@ -2061,6 +2185,7 @@ GameObject:
   - component: {fileID: 5571534843518578319}
   - component: {fileID: 7689586448218069573}
   - component: {fileID: 8862462836281827627}
+  - component: {fileID: 8862462836281827628}
   m_Layer: 0
   m_Name: Door Key
   m_TagString: Key
@@ -2105,6 +2230,24 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -5051912661706895321, guid: ad10e4113786ee546b5e5563829d2b45, type: 3}
+--- !u!114 &8862462836281827628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193765512025324432}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 5
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
