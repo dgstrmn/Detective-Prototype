@@ -6,6 +6,7 @@ Shader "Unlit/ToonShader"
         _Shades("Shades", Range(1,20)) = 3
         _InkColor("InkColor", Color) = (0,0,0,0)
         _InkSize("InkSize", float) = 1.0    
+        _ShadowColor("ShadowColor", Color) = (0,0,0,0)
     }
     SubShader
     {
@@ -73,6 +74,8 @@ Shader "Unlit/ToonShader"
             
             float _Shades;
 
+            float4 _ShadowColor;
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -86,7 +89,7 @@ Shader "Unlit/ToonShader"
                 float cosineAngle = dot(normalize(i.worldNormal), normalize(_WorldSpaceLightPos0.xyz));
                 cosineAngle = max(cosineAngle, 0.0); 
                 cosineAngle = floor(cosineAngle * _Shades) / _Shades;
-                return _Albedo * cosineAngle;
+                return _Albedo * cosineAngle + _ShadowColor;
             }
             ENDCG
         }
